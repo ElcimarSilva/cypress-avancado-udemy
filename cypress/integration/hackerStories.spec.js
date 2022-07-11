@@ -1,10 +1,28 @@
 describe('Hacker Stories', () => {
   beforeEach(() => {
-    cy.intercept('GET', '**/search?query=React&page=0').as('req')
-    cy.visit('/')
-    // cy.assertLoadingIsShownAndHidden()
-    // cy.contains('More').should('be.visible')
-    cy.wait('@req')
+    // 1 opcao
+    // cy.intercept('GET', '**/search?query=React&page=0').as('req')
+    // cy.visit('/')
+
+    // cy.assertLoadingIsShownAndHidden() // orginal
+    // cy.contains('More').should('be.visible') // orginal
+
+    // cy.wait('@req')
+
+    // 2 opção exe 2
+    cy.intercept({
+    method :'GET',
+    pathname: '**/search',
+    query: {
+      query: 'React',
+      page : '0',
+      }
+    }).as('getStories')
+    cy.intercept('GET','**/search?query=React&page=1').as('getNextStories')
+
+    cy.visit ('/')
+    cy.wait('@getStories')
+
   })
 
   it('shows the footer', () => {
@@ -26,8 +44,8 @@ describe('Hacker Stories', () => {
 
       cy.contains('More').click()
 
-      cy.assertLoadingIsShownAndHidden()
-
+      // cy.assertLoadingIsShownAndHidden()
+      cy.wait('@getNextStories')
       cy.get('.item').should('have.length', 40)
     })
 
@@ -71,14 +89,16 @@ describe('Hacker Stories', () => {
     beforeEach(() => {
       cy.get('#search')
         .clear()
+
+      cy.intercept('GET',`**/search?query=${newTerm}&page=0`).as('cy-req')
     })
 
     it('types and hits ENTER', () => {
       cy.get('#search')
         .type(`${newTerm}{enter}`)
 
-      cy.assertLoadingIsShownAndHidden()
-
+      // cy.assertLoadingIsShownAndHidden()
+      cy.wait('@cy-req')
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
         .first()
@@ -93,8 +113,8 @@ describe('Hacker Stories', () => {
       cy.contains('Submit')
         .click()
 
-      cy.assertLoadingIsShownAndHidden()
-
+      // cy.assertLoadingIsShownAndHidden()
+      cy.wait('@cy-req')
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
         .first()
@@ -108,13 +128,14 @@ describe('Hacker Stories', () => {
         cy.get('#search')
           .type(`${newTerm}{enter}`)
 
-        cy.assertLoadingIsShownAndHidden()
+        cy.wait('@cy-req')
+        // cy.assertLoadingIsShownAndHidden()
 
         cy.get(`button:contains(${initialTerm})`)
           .should('be.visible')
           .click()
-
-        cy.assertLoadingIsShownAndHidden()
+          cy.wait('@getStories')
+        // cy.assertLoadingIsShownAndHidden()
 
         cy.get('.item').should('have.length', 20)
         cy.get('.item')
@@ -134,7 +155,7 @@ describe('Hacker Stories', () => {
         })
 
         cy.assertLoadingIsShownAndHidden()
-
+        // cy.wait('@vision')
         cy.get('.last-searches button')
           .should('have.length', 5)
       })
