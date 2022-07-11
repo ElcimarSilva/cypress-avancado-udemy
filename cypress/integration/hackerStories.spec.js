@@ -90,7 +90,7 @@ describe('Hacker Stories', () => {
       cy.get('#search')
         .clear()
 
-      cy.intercept('GET',`**/search?query=${newTerm}&page=0`).as('cy-req')
+      cy.intercept('GET',`**/search?query=${newTerm}&page=0`).as('getNewTermStories')
     })
 
     it('types and hits ENTER', () => {
@@ -98,7 +98,7 @@ describe('Hacker Stories', () => {
         .type(`${newTerm}{enter}`)
 
       // cy.assertLoadingIsShownAndHidden()
-      cy.wait('@cy-req')
+      cy.wait('@getNewTermStories')
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
         .first()
@@ -114,7 +114,7 @@ describe('Hacker Stories', () => {
         .click()
 
       // cy.assertLoadingIsShownAndHidden()
-      cy.wait('@cy-req')
+      cy.wait('@getNewTermStories')
       cy.get('.item').should('have.length', 20)
       cy.get('.item')
         .first()
@@ -128,7 +128,7 @@ describe('Hacker Stories', () => {
         cy.get('#search')
           .type(`${newTerm}{enter}`)
 
-        cy.wait('@cy-req')
+        cy.wait('@getNewTermStories')
         // cy.assertLoadingIsShownAndHidden()
 
         cy.get(`button:contains(${initialTerm})`)
