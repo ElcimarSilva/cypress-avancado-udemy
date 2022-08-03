@@ -73,6 +73,7 @@ describe('Hacker Stories', () => {
         cy.wait('@getStories')
   
       })
+
       it('shows the footer', () => {
         cy.get('footer')
           .should('be.visible')
@@ -248,11 +249,14 @@ describe('Hacker Stories', () => {
           const faker = require('faker')
           cy.intercept('GET', '**/search**', {fixture: 'empty'}).as('getRamdomSearch')
           Cypress._.times(6, () => {
+            const randomWord = faker.random.word()
+
             cy.get('#search')
               .should('be.visible')
               .clear()
-              .type(`${faker.random.word()}{enter}`)
+              .type(`${randomWord}{enter}`)
             cy.wait('@getRamdomSearch')
+            cy.getLocalStorage('search').should('be.equal', randomWord)
           })
 
           // cy.get('.last-searches button')
@@ -300,3 +304,19 @@ describe('Hacker Stories', () => {
     })
   })
 })
+
+it('shows a "Loading ..." state before showing the results', () => {
+  cy.intercept(
+    'GET',
+    '**/search**',
+    {
+      delay: 1000,
+      fixture: 'stories'
+    }
+  ).as('getDelayedStories')
+  cy.visit('/')
+  cy.assertLoadingIsShownAndHidden()
+  cy.wait('@getDelayedStories')
+  cy.get('.item').should('have.length', 2)
+
+});
